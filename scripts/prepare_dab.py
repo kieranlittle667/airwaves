@@ -41,7 +41,7 @@ def prepare(root):
         # Local PCM playback does not use this optional network module.
         text = text.replace("./server-thread/tcp-server.cpp",
                             "$<$<BOOL:${SERVER}>:${CMAKE_CURRENT_SOURCE_DIR}/server-thread/tcp-server.cpp>")
-        text += "\nif(WIN32)\n  add_compile_definitions(NOMINMAX)\nendif()\n"
+        text += "\nif(WIN32)\n  add_compile_definitions(NOMINMAX _USE_MATH_DEFINES)\nendif()\n"
         path.write_text(text)
         path = root / folder / "main.cpp"
         text = path.read_text()
