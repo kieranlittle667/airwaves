@@ -4,6 +4,7 @@ on:
     paths:
       - scripts/prepare_dab.py
       - .github/workflows/dab-windows.yml
+      - scripts/package_dab.py
   workflow_dispatch:
 permissions:
   contents: read
@@ -43,8 +44,7 @@ jobs:
           mkdir -p dab-windows
           cp native-build/player/airwaves-dab-rtlsdr.exe native-build/scanner/dab-scanner-rtlsdr.exe dab-windows/
           # Include runtime dependencies (and the DLL loaded dynamically by RTL-SDR).
-          cp /ucrt64/bin/*.dll dab-windows/
-          cp /ucrt64/bin/librtlsdr.dll dab-windows/rtlsdr.dll
+          python scripts/package_dab.py dab-windows /ucrt64/bin
           cp native-source/COPYING dab-windows/ 2>/dev/null || cp native-source/LICENSE dab-windows/
           cp docs/dab-windows.md dab-windows/README.md
           # Complete corresponding source, including the applied modifications.
