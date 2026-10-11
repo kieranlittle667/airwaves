@@ -37,6 +37,10 @@ def prepare(root):
         text = text.replace(" -fsanitize=address", "").replace("-municode", "")
         text = text.replace("find_library (PTHREADS pthread)", "find_library (PTHREADS NAMES pthread winpthread)")
         text = text.replace("dab-rtlsdr-3", "airwaves-dab-rtlsdr")
+        # The upstream build compiles its POSIX server even with SERVER=OFF.
+        # Local PCM playback does not use this optional network module.
+        text = text.replace("./server-thread/tcp-server.cpp",
+                            "$<$<BOOL:${SERVER}>:${CMAKE_CURRENT_SOURCE_DIR}/server-thread/tcp-server.cpp>")
         text += "\nif(WIN32)\n  add_compile_definitions(NOMINMAX)\nendif()\n"
         path.write_text(text)
         path = root / folder / "main.cpp"
