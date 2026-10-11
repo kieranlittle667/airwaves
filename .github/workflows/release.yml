@@ -22,6 +22,10 @@ jobs:
         shell: cmd
         run: build.bat
 
+      - name: Build airwaves-ui.exe
+        shell: cmd
+        run: build-ui.bat
+
       - name: Upload to release
         shell: bash
         env:
@@ -29,4 +33,4 @@ jobs:
           TAG: ${{ github.ref_name }}
         run: |
           gh release view "$TAG" >/dev/null 2>&1 || gh release create "$TAG" --title "$TAG" --generate-notes
-          gh release upload "$TAG" dist/sdr.exe --clobber
+          gh release upload "$TAG" dist/sdr.exe dist/airwaves-ui.exe --clobber

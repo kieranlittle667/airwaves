@@ -28,6 +28,16 @@ When Zadig finishes, the dongle is ready to use with `sdr`.
 
 ## Installing
 
+### Desktop UI and DAB/DAB+
+
+This fork adds a native desktop interface. Run `uv sync --extra gui`, then
+`uv run airwaves-ui`. On Windows, `build-ui.bat` builds a standalone desktop
+executable. The optional DAB/DAB+ tab supports playback and Band III scanning
+through the separately installed Airwaves dab-cmdline backend. Every audio
+mode supports recording to WAV or MP3.
+See [desktop setup and limitations](docs/desktop-ui.md).
+
+
 The commands need Python 3.10 or later and [uv](https://docs.astral.sh/uv/). In this folder, run:
 
 ```

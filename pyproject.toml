@@ -18,6 +18,9 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+gui = [
+	"wxPython>=4.2,<5",
+]
 sonos = [
 	"soco",
 ]
@@ -26,6 +29,8 @@ airplay = [
 ]
 
 [project.scripts]
+airwaves-ui = "airwaves.gui:main"
+dab = "airwaves.dab:main"
 sdr = "airwaves.sdr:main"
 broadcastify = "airwaves.broadcastify:main"
 iheart = "airwaves.iheart:main"

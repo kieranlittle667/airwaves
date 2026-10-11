@@ -1,0 +1,21 @@
+name: Tests
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10.2.0
+        with:
+          python-version: "3.13"
+      - run: uv sync --extra gui
+      - run: uv run --with pytest pytest -q
+      - name: Build desktop executable
+        shell: cmd
+        run: build-ui.bat
+      - uses: actions/upload-artifact@v4
+        with:
+          name: airwaves-ui-windows
+          path: dist/airwaves-ui.exe

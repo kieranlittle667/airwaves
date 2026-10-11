@@ -25,13 +25,19 @@ if sys.platform == "win32":
 	# pyrtlsdr loads the osmocom driver (rtlsdr.dll) from the package folder.
 	os.add_dll_directory(os.path.dirname(__file__))
 	# Python's console stderr keeps writing to this handle, even after fd 2 changes.
-	STDERR_HANDLE = ctypes.c_void_p(msvcrt.get_osfhandle(2))
+	try:
+		handle = msvcrt.get_osfhandle(2)
+	except OSError:
+		handle = -1
+	# Windowed desktop builds do not have a console stderr handle.
+	STDERR_HANDLE = ctypes.c_void_p(handle) if handle not in (-1, -2, 0) else None
 from rtlsdr import RtlSdr
 from rtlsdr.librtlsdr import librtlsdr
 from rtlsdr.rtlsdr import LibUSBError
 
 from . import config, flight_log, nrsc5
 from .recorder import Recorder
+from .audio import Resampler
 
 VERSION = "0.3"
 VERSION_TEXT = f"SDR Tuner version {VERSION}"
@@ -834,33 +840,6 @@ class Demodulator:
 		self.stereo = bool(self.pilot_ratio > STEREO_THRESHOLD and level > PILOT_MIN_LEVEL)
 
 
-class Resampler:
-	"""Converts stereo audio from in_rate to out_rate by linear interpolation, carrying its position across blocks."""
-
-	def __init__(self, in_rate, out_rate):
-		self.in_rate = in_rate
-		self.out_rate = out_rate
-		self.reset()
-
-	def reset(self):
-		self.last = np.zeros((1, 2), dtype=np.float32)
-		# The next output frame's position in input frames, times out_rate, so it stays exact across blocks.
-		self.position = 0
-
-	def process(self, audio):
-		# Position 0 is the last frame of the previous block.
-		samples = np.concatenate((self.last, audio))
-		end = len(samples) - 1
-		count = max(0, -(-(end * self.out_rate - self.position) // self.in_rate))
-		positions = (self.position + np.arange(count) * self.in_rate) / self.out_rate
-		index = positions.astype(int)
-		fraction = (positions - index)[:, None]
-		out = samples[index] * (1 - fraction) + samples[np.minimum(index + 1, end)] * fraction
-		self.position += count * self.in_rate - end * self.out_rate
-		self.last = samples[-1:]
-		return out.astype(np.float32)
-
-
 class AudioBuffer:
 	"""Holds stereo audio between the SDR thread and the sound card callback."""
 
@@ -926,7 +905,7 @@ def quiet_driver():
 	"""Hides what librtlsdr prints while it opens and tunes the dongle.
 
 	The driver and nrsc5 print to the stderr of msvcrt.dll, which Python does not use. We make only that point at NUL, so other errors show as expected."""
-	if sys.platform != "win32":
+	if sys.platform != "win32" or STDERR_HANDLE is None:
 		yield
 		return
 	crt = ctypes.cdll.msvcrt
