@@ -1,6 +1,8 @@
 # Airwaves
 
-If you don't have Python or don't want to worry about the internals, you can [download the Windows app here](https://github.com/cartertemm/airwaves/releases/latest).
+Download the [Windows desktop preview from this fork](https://github.com/kieranlittle667/airwaves/releases).
+Extract the complete portable ZIP and open `airwaves-ui.exe`. It includes the
+DAB/DAB+ backend; no Python or separate AAC codec installation is needed.
 
 This repository contains commands for digitally receiving and getting information about radio stations.
 

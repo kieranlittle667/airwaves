@@ -43,6 +43,7 @@ def prepare(root):
         text = path.read_text()
         # Windows headers reserve "interface" as a COM macro.
         text = re.sub(r"\binterface\b", "callbacks", text)
+        text = re.sub(r"API_struct\s+callbacks;", "API_struct callbacks{};", text)
         text = text.replace("struct sigaction sigact;", "")
         text = re.sub(r"\s*sigact.sa_handler = sighandler;\s*sigemptyset\(&sigact.sa_mask\);\s*sigact.sa_flags = 0;",
                       "\n\tsignal(SIGINT, sighandler);\n\tsignal(SIGTERM, sighandler);", text)
@@ -53,6 +54,15 @@ def prepare(root):
             text = "#ifdef _WIN32\n#include <io.h>\n#include <fcntl.h>\n#endif\n" + text
             text = text.replace("int\tmain (int argc, char **argv) {",
                                 "int\tmain (int argc, char **argv) {\n#ifdef _WIN32\n_setmode(_fileno(stdout), _O_BINARY);\n#endif")
+        else:
+            text = text.replace("catch (int e)", "catch (const std::exception& e)")
+            text = text.replace('"allocating device failed (%d), fatal\\n", e',
+                                '"allocating device failed (%s), fatal\\n", e.what()')
+            # Flush each ensemble to the UI and finish after one complete pass,
+            # including when the last channel carries a valid ensemble.
+            text = text.replace("the_tiiHandler. print ();", "the_tiiHandler. print ();\n\t   fflush(outFile);")
+            text = text.replace("theChannel\t= dabBand. nextChannel (theBand, theChannel);",
+                                "theChannel\t= dabBand. nextChannel (theBand, theChannel);\n\t   if (theChannel == startChannel) break;")
         path.write_text(text)
 
     path = root / "devices" / "rtlsdr-handler" / "rtlsdr-handler.h"

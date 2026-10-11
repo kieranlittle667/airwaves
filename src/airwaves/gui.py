@@ -3,9 +3,19 @@
 import concurrent.futures
 import queue
 import sys
+from pathlib import Path
 
 from . import config, dab
 from .recording import Recording
+
+
+def bundled_decoder(name):
+    """Find a portable backend beside the frozen app, falling back to PATH."""
+    if getattr(sys, "frozen", False):
+        path = Path(sys.executable).parent / "dab-backend" / (name + ".exe")
+        if path.is_file():
+            return str(path)
+    return name
 
 try:
     import wx
@@ -147,8 +157,8 @@ if wx is not None:
             s.Add(wx.StaticText(p, label="DAB/DAB+ uses a separate dab-cmdline decoder and the first RTL-SDR dongle.\n"
                                "Install the Airwaves DAB backend; see docs/dab-windows.md. Volume controls are on the first tab."),
                   0, wx.ALL, 6)
-            self.dab_binary = self.field(p, s, "Playback &decoder", lambda: wx.TextCtrl(p, value=self.settings.get("dab_decoder", "airwaves-dab-rtlsdr")))
-            self.scanner_binary = self.field(p, s, "DAB &scanner", lambda: wx.TextCtrl(p, value=self.settings.get("dab_scanner", "dab-scanner-rtlsdr")))
+            self.dab_binary = self.field(p, s, "Playback &decoder", lambda: wx.TextCtrl(p, value=self.settings.get("dab_decoder", bundled_decoder("airwaves-dab-rtlsdr"))))
+            self.scanner_binary = self.field(p, s, "DAB &scanner", lambda: wx.TextCtrl(p, value=self.settings.get("dab_scanner", bundled_decoder("dab-scanner-rtlsdr"))))
             self.buttons(p, s, [("Browse decoder", lambda e: self.browse(self.dab_binary)),
                                ("Browse scanner", lambda e: self.browse(self.scanner_binary))])
             self.channel = self.field(p, s, "Band III &channel", lambda: wx.Choice(p, choices=list(dab.CHANNELS)))

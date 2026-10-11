@@ -1,5 +1,10 @@
 # Airwaves desktop UI and DAB/DAB+
 
+For Windows, download the portable ZIP from the
+[fork's releases](https://github.com/kieranlittle667/airwaves/releases),
+extract it, and open `airwaves-ui.exe`. Keep the `dab-backend` folder beside
+the application so its decoder paths are filled automatically.
+
 Install Python 3.10 or later and uv, then run:
 
 ```console

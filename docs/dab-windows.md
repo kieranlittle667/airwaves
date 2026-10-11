@@ -8,11 +8,15 @@ is needed when using the portable backend package.
 1. Install the RTL-SDR's WinUSB driver using Zadig, as described in the main
    README. Select the dongle's Interface 0, checking its USB identity before
    changing its driver.
-2. Download the `airwaves-dab-windows` artifact from a **successful**
+2. Download the portable desktop ZIP from the
+   [fork's releases](https://github.com/kieranlittle667/airwaves/releases).
+   Extract the entire ZIP; Airwaves finds the included `dab-backend` folder
+   automatically. Alternatively, download the `airwaves-dab-windows` artifact from a **successful**
    [DAB Windows backend workflow](https://github.com/kieranlittle667/airwaves/actions/workflows/dab-windows.yml).
    Extract the entire ZIP into a folder; keep its DLLs alongside the executables.
-3. Open Airwaves' DAB tab. Select `airwaves-dab-rtlsdr.exe` as the playback
-   decoder and `dab-scanner-rtlsdr.exe` as the scanner.
+3. Open Airwaves' DAB tab. If using the separate backend artifact, select
+   `airwaves-dab-rtlsdr.exe` as the playback decoder and
+   `dab-scanner-rtlsdr.exe` as the scanner.
 4. Connect the dongle and an antenna covering Band III (roughly 174–240 MHz).
    Scan Band III, choose a station, and press Play.
 
