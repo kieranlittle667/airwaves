@@ -41,6 +41,8 @@ def prepare(root):
         path.write_text(text)
         path = root / folder / "main.cpp"
         text = path.read_text()
+        # Windows headers reserve "interface" as a COM macro.
+        text = re.sub(r"\binterface\b", "callbacks", text)
         text = text.replace("struct sigaction sigact;", "")
         text = re.sub(r"\s*sigact.sa_handler = sighandler;\s*sigemptyset\(&sigact.sa_mask\);\s*sigact.sa_flags = 0;",
                       "\n\tsignal(SIGINT, sighandler);\n\tsignal(SIGTERM, sighandler);", text)
