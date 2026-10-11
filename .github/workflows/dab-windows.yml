@@ -52,8 +52,16 @@ jobs:
       - name: Check executable dependency loading
         shell: pwsh
         run: |
-          & ./dab-windows/airwaves-dab-rtlsdr.exe -C 12B -P Test -Q
+          $diagnostics = (& ./dab-windows/airwaves-dab-rtlsdr.exe -C 12B -P Test -Q 2>&1 | Out-String)
           if ($LASTEXITCODE -ne 1) { throw "Expected no-device exit code 1, got $LASTEXITCODE" }
+          Write-Output $diagnostics
+          if ($diagnostics -notmatch "Device not found") { throw "Decoder did not load its RTL-SDR runtime" }
+          $diagnostics = (& ./dab-windows/dab-scanner-rtlsdr.exe -C 5A -Q 2>&1 | Out-String)
+          if ($LASTEXITCODE -ne 32) { throw "Expected scanner no-device exit code 32, got $LASTEXITCODE" }
+          Write-Output $diagnostics
+          if ($diagnostics -notmatch "Device not found") { throw "Scanner did not load its RTL-SDR runtime" }
+          # A deliberate no-device exit must not fail the workflow step.
+          exit 0
       - uses: actions/upload-artifact@v4
         with:
           name: airwaves-dab-windows
