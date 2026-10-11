@@ -1,0 +1,60 @@
+name: DAB Windows backend
+on:
+  push:
+    paths:
+      - scripts/prepare_dab.py
+      - .github/workflows/dab-windows.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  native:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          update: true
+          install: >-
+            git
+            mingw-w64-ucrt-x86_64-gcc
+            mingw-w64-ucrt-x86_64-cmake
+            mingw-w64-ucrt-x86_64-ninja
+            mingw-w64-ucrt-x86_64-pkgconf
+            mingw-w64-ucrt-x86_64-python
+            mingw-w64-ucrt-x86_64-fftw
+            mingw-w64-ucrt-x86_64-faad2
+            mingw-w64-ucrt-x86_64-libsamplerate
+            mingw-w64-ucrt-x86_64-portaudio
+            mingw-w64-ucrt-x86_64-libsndfile
+            mingw-w64-ucrt-x86_64-rtl-sdr
+            mingw-w64-ucrt-x86_64-zlib
+      - name: Build pinned decoder and scanner
+        shell: msys2 {0}
+        run: |
+          git clone https://github.com/JvanKatwijk/dab-cmdline.git native-source
+          git -C native-source checkout 8b8230526a68d9ec52911dae0bd455cf1bb2fbad
+          python scripts/prepare_dab.py native-source
+          cmake -S native-source/example-3 -B native-build/player -G Ninja -DRTLSDR=ON -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -DCMAKE_BUILD_TYPE=Release
+          cmake --build native-build/player -j 2
+          cmake -S native-source/dab-scanner -B native-build/scanner -G Ninja -DRTLSDR=ON -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -DCMAKE_BUILD_TYPE=Release
+          cmake --build native-build/scanner -j 2
+          mkdir -p dab-windows
+          cp native-build/player/airwaves-dab-rtlsdr.exe native-build/scanner/dab-scanner-rtlsdr.exe dab-windows/
+          # Include runtime dependencies (and the DLL loaded dynamically by RTL-SDR).
+          cp /ucrt64/bin/*.dll dab-windows/
+          cp /ucrt64/bin/librtlsdr.dll dab-windows/rtlsdr.dll
+          cp native-source/COPYING dab-windows/ 2>/dev/null || cp native-source/LICENSE dab-windows/
+          cp docs/dab-windows.md dab-windows/README.md
+          # Complete corresponding source, including the applied modifications.
+          tar --exclude=.git -czf dab-windows/decoder-source.tar.gz native-source scripts/prepare_dab.py
+      - name: Check executable dependency loading
+        shell: pwsh
+        run: |
+          & ./dab-windows/airwaves-dab-rtlsdr.exe -C 12B -P Test -Q
+          if ($LASTEXITCODE -ne 1) { throw "Expected no-device exit code 1, got $LASTEXITCODE" }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: airwaves-dab-windows
+          path: dab-windows/
