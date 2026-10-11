@@ -74,6 +74,13 @@ def prepare(root):
                                    "#ifdef _WIN32\n#include <windows.h>\n#else\n#include <dlfcn.h>\n#endif")
     text = text.replace("typedef\tvoid *HINSTANCE;", "#ifndef _WIN32\ntypedef void *HINSTANCE;\n#endif")
     path.write_text(text)
+
+    path = root / "dab-scanner" / "tii-handling" / "tii-handler.cpp"
+    text = path.read_text().replace('std::string home_dir = getenv ("HOME");',
+        'const char *home = getenv("HOME");\n'
+        '\tif (!home) home = getenv("USERPROFILE");\n'
+        '\tstd::string home_dir = home ? home : "";')
+    path.write_text(text)
     path = root / "devices" / "rtlsdr-handler" / "rtlsdr-handler.cpp"
     text = path.read_text().replace('LoadLibrary ((wchar_t *)L"rtlsdr.dll")', 'LoadLibraryW(L"rtlsdr.dll")')
     path.write_text(text)
