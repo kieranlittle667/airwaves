@@ -28,6 +28,15 @@ def package(destination, bin_dir):
                 if not target.exists():
                     shutil.copy2(source, target)
                 pending.append(target)
+    licenses = bin_dir.parent / "share" / "licenses"
+    if licenses.is_dir():
+        shutil.copytree(licenses, destination / "runtime-licenses", dirs_exist_ok=True)
+    packages = subprocess.check_output(["pacman", "-Q"], text=True)
+    (destination / "runtime-packages.txt").write_text(
+        "Build dependencies and versions (MSYS2 UCRT64):\n" + packages +
+        "\nRuntime source packages and build recipes:\n"
+        "https://repo.msys2.org/mingw/sources/\n"
+        "https://github.com/msys2/MINGW-packages\n", encoding="utf-8")
 
 
 if __name__ == "__main__":
