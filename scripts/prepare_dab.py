@@ -39,14 +39,6 @@ def prepare(root):
         text = text.replace("dab-rtlsdr-3", "airwaves-dab-rtlsdr")
         text += "\nif(WIN32)\n  add_compile_definitions(NOMINMAX)\nendif()\n"
         path.write_text(text)
-    path = root / "devices" / "rtlsdr-handler" / "rtlsdr-handler.h"
-    text = path.read_text().replace("#include\t<dlfcn.h>",
-                                   "#ifdef _WIN32\n#include <windows.h>\n#else\n#include <dlfcn.h>\n#endif")
-    text = text.replace("typedef\tvoid *HINSTANCE;", "#ifndef _WIN32\ntypedef void *HINSTANCE;\n#endif")
-    path.write_text(text)
-    path = root / "devices" / "rtlsdr-handler" / "rtlsdr-handler.cpp"
-    text = path.read_text().replace('LoadLibrary ((wchar_t *)L"rtlsdr.dll")', 'LoadLibraryW(L"rtlsdr.dll")')
-    path.write_text(text)
         path = root / folder / "main.cpp"
         text = path.read_text()
         text = text.replace("struct sigaction sigact;", "")
@@ -60,6 +52,15 @@ def prepare(root):
             text = text.replace("int\tmain (int argc, char **argv) {",
                                 "int\tmain (int argc, char **argv) {\n#ifdef _WIN32\n_setmode(_fileno(stdout), _O_BINARY);\n#endif")
         path.write_text(text)
+
+    path = root / "devices" / "rtlsdr-handler" / "rtlsdr-handler.h"
+    text = path.read_text().replace("#include\t<dlfcn.h>",
+                                   "#ifdef _WIN32\n#include <windows.h>\n#else\n#include <dlfcn.h>\n#endif")
+    text = text.replace("typedef\tvoid *HINSTANCE;", "#ifndef _WIN32\ntypedef void *HINSTANCE;\n#endif")
+    path.write_text(text)
+    path = root / "devices" / "rtlsdr-handler" / "rtlsdr-handler.cpp"
+    text = path.read_text().replace('LoadLibrary ((wchar_t *)L"rtlsdr.dll")', 'LoadLibraryW(L"rtlsdr.dll")')
+    path.write_text(text)
 
 
 if __name__ == "__main__":
