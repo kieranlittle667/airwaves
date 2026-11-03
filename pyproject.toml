@@ -14,7 +14,7 @@ dependencies = [
 	"pyrtlsdr==0.3.0",
 	"pyrtlsdrlib; sys_platform != 'win32'",
 	# pyrtlsdr 0.3.0 imports pkg_resources, which setuptools 81 removes.
-	"setuptools<81",
+	"setuptools<85",
 ]
 
 [project.optional-dependencies]
