@@ -12,8 +12,8 @@ jobs:
   native:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v7
-      - uses: msys2/setup-msys2@v2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: msys2/setup-msys2@ec48f7c5447b3140e2b088413ae3a55687bccb6e
         with:
           msystem: UCRT64
           update: true
@@ -62,7 +62,7 @@ jobs:
           if ($diagnostics -notmatch "Device not found") { throw "Scanner did not load its RTL-SDR runtime" }
           # A deliberate no-device exit must not fail the workflow step.
           exit 0
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: airwaves-dab-windows
           path: dab-windows/
